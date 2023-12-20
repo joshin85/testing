@@ -21,12 +21,28 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Bump release version
-        id: bump_version
-        uses: christian-draeger/increment-semantic-version@1.1.0
-        with:
-          current-version: '2.11.7' # also accepted: 'v2.11.7-alpha.3' | '2.11.7-alpha3'
-          version-fragment: 'feature'
+
+    - uses: paulhatch/semantic-version@v5.3.0
+      with:
+        # The prefix to use to identify tags
+        tag_prefix: "v"
+        # A string which, if present in a git commit, indicates that a change represents a
+        # major (breaking) change, supports regular expressions wrapped with '/'
+        major_pattern: "(MAJOR)"
+        # A string which indicates the flags used by the `major_pattern` regular expression. Supported flags: idgs
+        major_regexp_flags: ""
+        # Same as above except indicating a minor change, supports regular expressions wrapped with '/'
+        minor_pattern: "(MINOR)"
+        # A string which indicates the flags used by the `minor_pattern` regular expression. Supported flags: idgs
+        minor_regexp_flags: ""
+        # A string to determine the format of the version output
+        version_format: "${major}.${minor}.${patch}-prerelease${increment}"
+        # If this is set to true, *every* commit will be treated as a new version.
+        bump_each_commit: false
+        # If enabled, diagnostic information will be added to the action output.
+        debug: true
+        # If true, the branch will be used to select the maximum version.
+        version_from_branch: false
       - name: Log in to the Container registry
         uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
         with:
@@ -58,7 +74,7 @@ jobs:
           context: .
           push: true
           tags: |
-           ghcr.io/${{ steps.bump_version.outputs.next-version }}
+            ghcr.io/${{ steps.bump_version.outputs.next-version }}
             ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
