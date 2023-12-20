@@ -11,6 +11,15 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 jobs:
+  update-semver:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: haya14busa/action-update-semver@v1
+        id: version
+        with:
+          major_version_tag_only: true  # (optional, default is "false")
+
   build-and-push-image:
     runs-on: ubuntu-latest
 
@@ -37,6 +46,8 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           # generate Docker tags based on the following events/attributes
           tags: |
+            tag_v=$(git describe --tags $(git rev-list --tags --max-count=1))
+            tag=$(echo $tag_v | sed 's/v//')
             type=schedule
             type=ref,event=branch
             type=ref,event=pr
@@ -46,14 +57,7 @@ jobs:
             type=sha     
           flavor: |
             latest=true
-
-      - name: Tag
-        uses: K-Phoen/semver-release-action@master
-        with:
-          release_branch: master
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
+ 
       - name: Build and push Docker image
         uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
         with:
