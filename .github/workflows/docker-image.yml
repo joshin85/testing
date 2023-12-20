@@ -11,15 +11,6 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 jobs:
-  update-semver:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
-      - uses: haya14busa/action-update-semver@v1
-        id: version
-        with:
-          github_token: ${{ secrets.github_token }}
-
   build-and-push-image:
     runs-on: ubuntu-latest
 
@@ -30,7 +21,12 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-
+      - name: Bump release version
+        id: bump_version
+        uses: christian-draeger/increment-semantic-version@1.1.0
+        with:
+          current-version: '2.11.7' # also accepted: 'v2.11.7-alpha.3' | '2.11.7-alpha3'
+          version-fragment: 'feature'
       - name: Log in to the Container registry
         uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
         with:
@@ -46,8 +42,6 @@ jobs:
           images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           # generate Docker tags based on the following events/attributes
           tags: |
-            tag_v=$(git describe --tags $(git rev-list --tags --max-count=1))
-            tag=$(echo $tag_v | sed 's/v//')
             type=schedule
             type=ref,event=branch
             type=ref,event=pr
@@ -64,6 +58,7 @@ jobs:
           context: .
           push: true
           tags: |
+            ${{ steps.bump_version.outputs.next-version }}
             ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
 
