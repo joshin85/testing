@@ -9,6 +9,10 @@ app = FastAPI()
 async def redirect_root_to_docs():
     return RedirectResponse("/docs")
 
+@app.get("/asdf")
+async def redirect_root_to_docs():
+    return RedirectResponse("/docs")
+
 
 if __name__ == "__main__":
     import uvicorn
