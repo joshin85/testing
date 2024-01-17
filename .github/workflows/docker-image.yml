@@ -34,6 +34,7 @@ jobs:
           minor_regexp_flags: ""
           version_format: "${major}.${minor}.${patch}"
           bump_each_commit: true
+          version_from_branch: true
           bump_each_commit_patch_pattern: ""
       - name: Log in to the Container registry
         uses: docker/login-action@65b78e6e13532edd9afa3aa52ac7964289d1a9c1
