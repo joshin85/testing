@@ -18,6 +18,10 @@ async def redirect_root_to_docs():
 async def redirect_root_to_docs():
     return RedirectResponse("/docs")
 
+@app.get("/sdfff")
+async def redirect_root_to_docs():
+    return RedirectResponse("/docs")
+
 
 if __name__ == "__main__":
     import uvicorn
